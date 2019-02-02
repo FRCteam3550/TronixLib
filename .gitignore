@@ -3,4 +3,4 @@
 
 # Ignore Gradle build output directory
 build
-bin/main/TronixLib/DifferentialDriveTronix.class
+bin/main/TronixLib/*.class
