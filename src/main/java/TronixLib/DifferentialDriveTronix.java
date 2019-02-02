@@ -111,8 +111,8 @@ public class DifferentialDriveTronix extends RobotDriveBase {
   private double m_rightSideInvertMultiplier = -1.0;
   private boolean m_reported;
 
-  private double m_currentForwardSpeed; 
-  private double m_currentTunringSpeed;
+  //private double m_currentForwardSpeed; 
+  //private double m_currentTunringSpeed;
 
   private double m_leftMotorOutput;
   private double m_rightMotorOutput;
@@ -129,8 +129,8 @@ public class DifferentialDriveTronix extends RobotDriveBase {
     //verify();
     m_leftMotor = leftMotor;
     m_rightMotor = rightMotor;
-    m_currentForwardSpeed = 0;
-    m_currentTunringSpeed = 0;
+    //m_currentForwardSpeed = 0;
+    //m_currentTunringSpeed = 0;
     addChild(m_leftMotor);
     addChild(m_rightMotor);
     instances++;
@@ -190,8 +190,8 @@ public class DifferentialDriveTronix extends RobotDriveBase {
     }
 
     
-    m_currentForwardSpeed = currentForwardSpeed;
-    m_currentTunringSpeed = currentTurningSpeed;
+    //m_currentForwardSpeed = currentForwardSpeed;
+    //m_currentTunringSpeed = currentTurningSpeed;
 
     xSpeed = limit(xSpeed);
     //xSpeed = applyDeadband(xSpeed, m_deadband);
@@ -242,8 +242,8 @@ public class DifferentialDriveTronix extends RobotDriveBase {
   }
 
   public void boostInputs(double currentForwardSpeed, double currentTurningSpeed){
-    m_currentForwardSpeed = 1.0;  // Pour eliminer une erreur de compilation inutile
-    m_currentTunringSpeed = 1.0;
+    //m_currentForwardSpeed = 1.0;  // Pour eliminer une erreur de compilation inutile
+    //m_currentTunringSpeed = 1.0;
 
     // permaBoost (testing purposes only)    
     if (m_leftMotorOutput != 0 && m_rightMotorOutput != 0){
