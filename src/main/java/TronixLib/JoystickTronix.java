@@ -8,39 +8,38 @@ public class JoystickTronix {
 
     //Ces variables peuvent soit être modifier manuellement ici ou avec les fonctions plus bas.
     //Par contre, je conseille de les modifier ici à chaque début de saison et seulement utiliser les fonctions en cas d'urgence
-    private double DeadbandXMinimumPositif = 0.4;
-    private double DeadbandXMinimumNegatif = -0.3;
+    private double m_deadbandXMinimumPositif = 0.4;
+    private double m_deadbandXMinimumNegatif = -0.3;
 
-    private double DeadbandYMinimumPositif = 0.1;
-    private double DeadbandYMinimumNegatif = -0.10;
+    private double m_deadbandYMinimumPositif = 0.1;
+    private double m_deadbandYMinimumNegatif = -0.10;
 
-    private double DeadbandZMinimumPositif = 0.4;
-    private double DeadbandZMinimumNegatif = -0.3;
+    private double m_deadbandZMinimumPositif = 0.4;
+    private double m_deadbandZMinimumNegatif = -0.3;
 
     public JoystickTronix(int port) {
         m_CurrentJoystick = new Joystick(port);
     }
 
     //Only use these for emergencies (ex: on est à la compétition et on trouve un problème) or for testing values more easely
-    public void SetDeadbandX (double Positif, double Negatif) {
-        DeadbandXMinimumPositif = Positif;
-        DeadbandXMinimumNegatif = Negatif;
+    public void setDeadbandX (double Positif, double Negatif) {
+        m_deadbandXMinimumPositif = Positif;
+        m_deadbandXMinimumNegatif = Negatif;
     }
 
-    public void SetDeadbandY (double Positif, double Negatif) {
-        DeadbandYMinimumPositif = Positif;
-        DeadbandYMinimumNegatif = Negatif;
+    public void setDeadbandY (double Positif, double Negatif) {
+        m_deadbandYMinimumPositif = Positif;
+        m_deadbandYMinimumNegatif = Negatif;
     }
 
-    public void SetDeadbandZ (double Positif, double Negatif) {
-        DeadbandZMinimumPositif = Positif;
-        DeadbandZMinimumNegatif = Negatif;
+    public void setDeadbandZ (double Positif, double Negatif) {
+        m_deadbandZMinimumPositif = Positif;
+        m_deadbandZMinimumNegatif = Negatif;
     }
 
     public double getX() {
         double returnvalue = m_CurrentJoystick.getX();
-        if ((returnvalue < DeadbandXMinimumNegatif)||(returnvalue > DeadbandXMinimumPositif)){ //Filtrer les valeurs trop petites
-            //if ((Math.abs(returnvalue) < 0.2)){
+        if ((returnvalue < m_deadbandXMinimumNegatif)||(returnvalue > m_deadbandXMinimumPositif)){ //Filtrer les valeurs trop petites
             return returnvalue;
         }
         else {
@@ -49,8 +48,7 @@ public class JoystickTronix {
     }
     public double getY() {
         double returnvalue = m_CurrentJoystick.getY();
-        if ((returnvalue < DeadbandYMinimumNegatif)||(returnvalue > DeadbandYMinimumPositif)){ //Filtrer les valeurs trop petites
-            //if ((Math.abs(returnvalue) < 0.1)){
+        if ((returnvalue < m_deadbandYMinimumNegatif)||(returnvalue > m_deadbandYMinimumPositif)){ //Filtrer les valeurs trop petites
             return returnvalue;
         }
         else {
@@ -59,8 +57,7 @@ public class JoystickTronix {
     }
     public double getZ() {
         double returnvalue = m_CurrentJoystick.getZ();
-        if ((returnvalue < DeadbandZMinimumNegatif)||(returnvalue > DeadbandZMinimumPositif)){ //Filtrer les valeurs trop petites
-            //if ((Math.abs(returnvalue) < 0.2)){
+        if ((returnvalue < m_deadbandZMinimumNegatif)||(returnvalue > m_deadbandZMinimumPositif)){ //Filtrer les valeurs trop petites
             return returnvalue;
         }
         else {
