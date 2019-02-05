@@ -10,6 +10,8 @@ import java.io.IOException;
 
 public class RecordDataTronix {
 
+	private float m_StartCounter;
+
 	//
 	//  Exemple d'utilisation:
 	//
@@ -29,7 +31,16 @@ public class RecordDataTronix {
 	//                               log.recordDataToFile(timelist, somedatalist, "/home/lvuser/somedataTime.txt", "/home/lvuser/somedataList.txt");
 	//
 
-    public static void recordDataToFile(List<Float> dataTime,List<Double> data, String filename1,String filename2) {
+	public RecordDataTronix () {
+		m_StartCounter = (float) System.nanoTime();
+	}
+
+	public float GetCurrentNanoTime () {
+		return System.nanoTime() - m_StartCounter;
+	}
+
+
+    public static void RecordDataToFile(List<Float> dataTime,List<Double> data, String filename1,String filename2) {
     	try { 
     		//DataOutputStream dos= new DataOutputStream(new BufferedOutputStream(new FileOutputStream(filename1))); 
     		FilterOutputStream fileOutputStream1 = new FilterOutputStream(new BufferedOutputStream(new FileOutputStream(filename1)));
