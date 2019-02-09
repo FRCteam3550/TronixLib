@@ -34,3 +34,15 @@ dependencies {
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
     testCompile 'junit:junit:4.12'
 }
+
+sourceSets {
+    main {
+        java {
+            exclude 'TronixLib/testSystems/*'
+        }
+    }
+}
+
+jar {
+    exclude ("testSystems/**")
+}
