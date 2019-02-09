@@ -111,6 +111,8 @@ public class DifferentialDriveTronix extends RobotDriveBase {
   private double m_rightSideInvertMultiplier = -1.0;
   private boolean m_reported;
 
+  private boolean m_forwardCompensationMode;
+  private boolean m_rotationCompensationMode;
   //private double m_currentForwardSpeed; 
   //private double m_currentTunringSpeed;
 
@@ -126,14 +128,19 @@ public class DifferentialDriveTronix extends RobotDriveBase {
    */
   public DifferentialDriveTronix(SpeedController leftMotor, SpeedController rightMotor) {
     verify(leftMotor, rightMotor);
-    //verify();
     m_leftMotor = leftMotor;
     m_rightMotor = rightMotor;
-    //m_currentForwardSpeed = 0;
-    //m_currentTunringSpeed = 0;
     addChild(m_leftMotor);
     addChild(m_rightMotor);
+    
+    m_forwardCompensationMode = false;
+    m_rotationCompensationMode = false;
+
+    //m_currentxSpeed = 0;
+    //m_currentTunringSpeed = 0;
+    
     instances++;
+    
     setName("DifferentialDriveTronix", instances);
   }
 
@@ -160,18 +167,14 @@ public class DifferentialDriveTronix extends RobotDriveBase {
     throw new NullPointerException(joiner.toString());
   }
 
-  /**
-   * Arcade drive method for differential drive platform.
-   * The calculated values will be squared to decrease sensitivity at low speeds.
-   *
-   * @param xSpeed    The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
-   * @param zRotation The robot's rotation rate around the Z axis [-1.0..1.0]. Clockwise is
-   *                  positive.
-   */
-  //@SuppressWarnings("ParameterName")
- // public void arcadeDrive(double xSpeed, double zRotation) {
-  //  arcadeDrive(xSpeed, zRotation, forw);
- // }
+  private void setForwardMode(Boolean newmode) {
+      m_forwardCompensationMode = newmode;
+  }
+
+  private void setRotationMode(Boolean newmode) {
+    m_rotationCompensationMode = newmode;
+  }
+
 
   /**
    * Arcade drive method for differential drive platform.
@@ -182,35 +185,19 @@ public class DifferentialDriveTronix extends RobotDriveBase {
    * @param squareInputs If set, decreases the input sensitivity at low speeds.
    */
   //@SuppressWarnings("ParameterName")
-  public void arcadeDrive(double xSpeed, double zRotation, double currentForwardSpeed, double currentTurningSpeed) {
+  public void arcadeDrive(double xSpeed, double zRotation, double currentxSpeed, double currentTurningSpeed) {
     if (!m_reported) {
       HAL.report(tResourceType.kResourceType_RobotDrive, 2,
                  tInstances.kRobotDrive2_DifferentialArcade);
       m_reported = true;
     }
-
     
-    //m_currentForwardSpeed = currentForwardSpeed;
+    //m_currentxSpeed = currentxSpeed;
     //m_currentTunringSpeed = currentTurningSpeed;
 
     xSpeed = limit(xSpeed);
-    //xSpeed = applyDeadband(xSpeed, m_deadband);
-
     zRotation = limit(zRotation);
-    //zRotation = applyDeadband(zRotation, m_deadband);
-
-    // Square the inputs (while preserving the sign) to increase fine control
-    // while permitting full power.
-  //  if (squareInputs) {
-  //    xSpeed = Math.copySign(xSpeed * xSpeed, xSpeed);
-  //    zRotation = Math.copySign(zRotation * zRotation, zRotation);
-   // }
-
-   
-
-    //double leftMotorOutput;
-    //double rightMotorOutput;
-
+ 
     double maxInput = Math.copySign(Math.max(Math.abs(xSpeed), Math.abs(zRotation)), xSpeed);
 
     if (xSpeed >= 0.0) {
@@ -233,7 +220,7 @@ public class DifferentialDriveTronix extends RobotDriveBase {
       }
     }
 
-    boostInputs(currentForwardSpeed, currentTurningSpeed);
+    boostInputs(xSpeed, zRotation, currentxSpeed, currentTurningSpeed);
   
     m_leftMotor.set(limit(m_leftMotorOutput) * m_maxOutput);
     m_rightMotor.set(limit(m_rightMotorOutput) * m_maxOutput * m_rightSideInvertMultiplier );
@@ -241,45 +228,50 @@ public class DifferentialDriveTronix extends RobotDriveBase {
     feed();
   }
 
-  public void boostInputs(double currentForwardSpeed, double currentTurningSpeed){
-    //m_currentForwardSpeed = 1.0;  // Pour eliminer une erreur de compilation inutile
-    //m_currentTunringSpeed = 1.0;
+  public void boostInputs(double xSpeed, double zRotation, double currentxSpeed, double currentTurningSpeed){
+    // 0 driving setpoint will never need any boost, nor when all disabled
+    if ((xSpeed == 0 && zRotation == 0) ||
+        (m_forwardCompensationMode == false && m_rotationCompensationMode == false)){
+        return;
+    }
 
-    // permaBoost (testing purposes only)    
+    // !!  permaBoost (testing purposes only) - returns right away    
     if (m_leftMotorOutput != 0 && m_rightMotorOutput != 0){
-    m_leftMotorOutput = m_leftMotorOutput + 0.3;
-    m_rightMotorOutput = m_rightMotorOutput + 0.3;
-   }
+        m_leftMotorOutput = m_leftMotorOutput + 0.3;
+        m_rightMotorOutput = m_rightMotorOutput + 0.3;
+        return;
+    }
+
     /*  m_ some stuff
     //straight boosts
     if (currentTurningSpeed == 0 && leftMotorOutput == rightMotorOutput){
     //highBoost 
-     if (currentForwardSpeed == 0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2){
+     if (currentxSpeed == 0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2){
         leftMotorOutput = leftMotorOutput + 0.3;
         rightMotorOutput = rightMotorOutput + 0.3;
       }
       //midBoost - unused (set variables)
-      //else if(currentForwardSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0){
+      //else if(currentxSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0){
         //  leftMotorOutput = leftMotorOutput + 0.2;
          // rightMotorOutput = rightMotorOutput + 0.2;
       //}
       // lowBoost
-      else if (currentForwardSpeed == 0  && leftMotorOutput >= 0.5 && rightMotorOutput >= 0.5){
+      else if (currentxSpeed == 0  && leftMotorOutput >= 0.5 && rightMotorOutput >= 0.5){
           leftMotorOutput = leftMotorOutput + 0.1;
           rightMotorOutput = rightMotorOutput + 0.1;
       }
       //highMinusBoost - unused (set variables)
-     // else if (currentForwardSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
+     // else if (currentxSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
       //    leftMotorOutput = leftMotorOutput - 0.3;
        //   rightMotorOutput = rightMotorOutput - 0.3;
       //}
       //midMinusBoost - unused (set variables)
-     // else if (currentForwardSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
+     // else if (currentxSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
        //   leftMotorOutput = leftMotorOutput - 0.2;
         //  rightMotorOutput = rightMotorOutput - 0.2;
      // }
       // lowMinusBoost
-      else if (currentForwardSpeed == 1.0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2) {
+      else if (currentxSpeed == 1.0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2) {
         leftMotorOutput = leftMotorOutput - 0.1;
         rightMotorOutput = rightMotorOutput - 0.1;
       }
@@ -287,7 +279,7 @@ public class DifferentialDriveTronix extends RobotDriveBase {
     }
       // NOT YET USABLE - (wrong variables)
       // turn boosts - no forward speed
-      else if (currentForwardSpeed == 0 && leftMotorOutput != rightMotorOutput) {
+      else if (currentxSpeed == 0 && leftMotorOutput != rightMotorOutput) {
           //highBoost 
      if (currentTurningSpeed == 0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2){
         leftMotorOutput = leftMotorOutput + 0.3;
@@ -321,34 +313,34 @@ public class DifferentialDriveTronix extends RobotDriveBase {
       }
        // NOT YET USABLE - (wrong variables & names)
       // turn boosts w/forward speed 
-      else if (currentForwardSpeed != 0 && leftMotorOutput != rightMotorOutput){
+      else if (currentxSpeed != 0 && leftMotorOutput != rightMotorOutput){
           //highBoost 
-     if (currentForwardSpeed == 0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2){
+     if (currentxSpeed == 0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2){
         leftMotorOutput = leftMotorOutput + 0.3;
         rightMotorOutput = rightMotorOutput + 0.3;
       }
       //midBoost - unused (set variables)
-      //else if(currentForwardSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0){
+      //else if(currentxSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0){
       //    leftMotorOutput = leftMotorOutput + 0.2;
       //    rightMotorOutput = rightMotorOutput + 0.2;
      // }
       // lowBoost
-      else if (currentForwardSpeed == 0  && leftMotorOutput >= 0.5 && rightMotorOutput >= 0.5){
+      else if (currentxSpeed == 0  && leftMotorOutput >= 0.5 && rightMotorOutput >= 0.5){
           leftMotorOutput = leftMotorOutput + 0.1;
           rightMotorOutput = rightMotorOutput + 0.1;
       }
       //highMinusBoost - unused (set variables)
-     // else if (currentForwardSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
+     // else if (currentxSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
      //     leftMotorOutput = leftMotorOutput - 0.3;
      //     rightMotorOutput = rightMotorOutput - 0.3;
      // }
       //midMinusBoost - unused (set variables)
-     // else if (currentForwardSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
+     // else if (currentxSpeed == 0 && leftMotorOutput >= 0 && rightMotorOutput >= 0) {
      //     leftMotorOutput = leftMotorOutput - 0.2;
      //     rightMotorOutput = rightMotorOutput - 0.2;
      // }
       // lowMinusBoost
-      else if (currentForwardSpeed == 1.0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2) {
+      else if (currentxSpeed == 1.0 && leftMotorOutput >= 0.2 && rightMotorOutput >= 0.2) {
         leftMotorOutput = leftMotorOutput - 0.1;
         rightMotorOutput = rightMotorOutput - 0.1;
 
