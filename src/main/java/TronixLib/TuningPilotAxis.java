@@ -6,11 +6,11 @@ public class TuningPilotAxis {
                         // 1 : Au carre
                         // 2 : exponentiel? etc 
 
-    public void TuningPilotAxis() {
+    public TuningPilotAxis() {
         m_mode = 0;
     }
 
-    public void TuningPilotAxis(int tuningmode) {
+    public TuningPilotAxis(int tuningmode) {
         m_mode = tuningmode;
     }
 
