@@ -3,16 +3,9 @@ package TronixLib;
 import edu.wpi.first.wpilibj.Joystick;
 
 /**
- * TODO : This
- */
-/**
- * Exemple :
- * A state machine representing a complete action to be performed by the robot.  Commands are
- * run by the {@link CommandScheduler}, and can be composed into CommandGroups to allow users to
- * build complicated multi-step actions without the need to roll the state machine logic themselves.
- *
- * <p>Commands are run synchronously from the main robot loop; no multithreading is used, unless
- * specified explicitly from the command implementation.
+ * [FR] JoystickTronix est une classe permettant l'automatisation de certain des actions lié à un joystick,
+ *      comme, par exemple, le deadband
+ * [EN] JoystickTronix is responsable to automate some actions linked to a joystick, like, for example, the deadband
  */
 public class JoystickTronix {
     
